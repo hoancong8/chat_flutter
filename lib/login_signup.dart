@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:demoappprovider/CustomTextField.dart';
 import 'package:demoappprovider/firebase_options.dart';
 import 'package:demoappprovider/firebasetest.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,7 +11,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.web,
   ); // hoặc DefaultFirebaseOptions.currentPlatform
-  runApp(MaterialApp(home: LoginScreen()));
+  runApp(MaterialApp(home: LoginScreen(),debugShowCheckedModeBanner: false,));
 }
 
 class AuthService {
@@ -72,8 +73,18 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
+  final nameController = TextEditingController();
   String errorMessage = "";
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setState(() {
+      nameController.addListener(() {
+        print(nameController.text.toString());
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,32 +95,44 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Đăng nhập", textAlign: TextAlign.center),
-            TextField(
+            Text("Đăng nhập", textAlign: TextAlign.center,style: TextStyle(fontSize: 18,),),
+            const SizedBox(height: 20), 
+            CustomTextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: "Email"),
+              name: "Email",
+              prefixIcon: Icons.email_outlined,
+              inputType: TextInputType.emailAddress,
+              textCapitalization: TextCapitalization.words,
             ),
-            const SizedBox(height: 12),
-            TextField(
+            CustomTextField(
               controller: passwordController,
-              decoration: const InputDecoration(labelText: "Mật khẩu"),
+
+              name: "password",
               obscureText: true,
+              prefixIcon: Icons.lock_outlined,
+              inputType: TextInputType.visiblePassword,
+              textCapitalization: TextCapitalization.words,
             ),
-            const SizedBox(height: 20),
-            InkWell(
-              onTap: () {
-                print("Bạn đã nhấn vào");
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const signUpScreen()),
-                );
-              },
-              child: Text(
-                "Chưa có tài khoản? Đăng ký",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
+            
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: InkWell(
+                
+                onTap: () {
+                  print("Bạn đã nhấn vào");
+              
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const signUpScreen()),
+                  );
+                },
+                child: Text(
+                  "Chưa có tài khoản? Đăng ký",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
             ),
@@ -129,7 +152,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     passwordController.text.trim(),
                   );
                   await AuthService().getUserData(uid);
-
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyApp()),
+                  );
                   // Ví dụ: điều hướng sang trang chính
                   // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
                 } catch (e) {
@@ -137,10 +163,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     errorMessage = e.toString();
                   });
                 }
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyApp()),
-                );
               },
               child: const Text("Đăng nhập"),
             ),
@@ -167,20 +189,21 @@ class _signUpScreenState extends State<signUpScreen> {
   bool eyebt = true;
   bool clearE = true;
   bool clearPW = true;
-  bool clearRPW= true;
+  bool clearRPW = true;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    emailController.addListener(()=>{
-      setState(() {
-        print(emailController.text.toString());
-      })
-    });
+    emailController.addListener(
+      () => {
+        setState(() {
+          print(emailController.text.toString());
+          //hoan số 1
+        }),
+      },
+    );
   }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -199,7 +222,6 @@ class _signUpScreenState extends State<signUpScreen> {
                   child: IconButton(
                     onPressed: () => {emailController.clear()},
                     icon: Icon(Icons.clear),
-                    
                   ),
                 ),
               ),

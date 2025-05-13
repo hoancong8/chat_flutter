@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 
 class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
-  final String name;
+  final String name, errorName;
   final IconData prefixIcon;
-  final bool obscureText;
+  bool obscureText, isValid;
   final TextCapitalization textCapitalization;
   final TextInputType inputType;
 
-  const CustomTextField({
+  CustomTextField({
     Key? key,
     required this.controller,
     required this.name,
+    this.errorName = "",
     required this.prefixIcon,
     this.obscureText = false,
+    this.isValid = false,
     this.textCapitalization = TextCapitalization.none,
     required this.inputType,
   }) : super(key: key);
@@ -34,6 +36,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     widget.controller.addListener(() {
       setState(() {
         _hasText = widget.controller.text.isNotEmpty;
+        widget.isValid = false;
       });
     });
   }
@@ -81,6 +84,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             borderSide: BorderSide(color: Colors.green),
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
+          errorText: widget.isValid ? widget.errorName : null,
         ),
       ),
     );

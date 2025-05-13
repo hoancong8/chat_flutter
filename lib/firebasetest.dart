@@ -1,17 +1,17 @@
-import 'package:demoappprovider/firebase_options.dart';
-import 'package:demoappprovider/main.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:demoappprovider/CustomWidget/CustomTextField.dart';
+// import 'package:demoappprovider/firebase_options.dart';
+// import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
 
-  //khởi tạo với cầu hình web trong firebase_options
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.web);
-  // DefaultFirebaseOptions.currentPlatform;
-  runApp(MyApp());
-}
+//   //khởi tạo với cầu hình web trong firebase_options
+//   await Firebase.initializeApp(options: DefaultFirebaseOptions.web);
+//   // DefaultFirebaseOptions.currentPlatform;
+//   runApp(MyApp());
+// }
 
 class MyApp extends StatelessWidget {
   //khởi tạo tham chiếu đến node "messages"
@@ -88,13 +88,12 @@ class MyApp extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      //lấy dữ liệu trong textfield
+                    child:
+                    CustomTextField(
                       controller: _textController,
-
-                      decoration: const InputDecoration(
-                        labelText: 'Nhập tin nhắn',
-                      ),
+                      inputType: TextInputType.none,
+                      name: "enter messager",
+                      prefixIcon: Icons.abc_outlined,
                     ),
                   ),
                   IconButton(

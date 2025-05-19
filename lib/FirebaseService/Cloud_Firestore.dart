@@ -35,4 +35,43 @@ class MessagerFirestore {
       'lastTimestamp': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
+
+  Future<Object?> getLastMessage(String userA, String userB) async {
+    try {
+      // Sắp xếp ID để đúng thứ tự userA_userB
+      final chatId = generateChatId(userA, userB);
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('chats')
+              .doc(chatId)
+              .collection('messages')
+              .orderBy(
+                'timestamp',
+                descending: true,
+              ) // timestamp là thời gian gửi
+              .limit(1) // chỉ lấy tin nhắn mới nhất
+              .get();
+      // Truy cập document trong collection 'chats'
+      if (querySnapshot.docs.isNotEmpty) {
+        final lastMsg = querySnapshot.docs.first;
+        // print("hiihihhi121311${lastMsg.data()}");
+        // final timestamp = lastMsg['timestamp'] as Timestamp;
+        // final dateTime = timestamp.toDate(); // Chuyển thành DateTime
+        // final formattedTime =
+        //     "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+
+        // if (lastMsg['senderId'] == userA) {
+          return querySnapshot.docs.first;
+        // } else {
+        //   return "${lastMsg['text']}${formattedTime}" ?? '';
+        // }
+        // 'content' là trường chứa nội dung tin nhắn
+      // } else {
+      //   return null; // không có tin nhắn
+      }
+    } catch (e) {
+      print('Lỗi khi lấy lastMessage: $e');
+      return null;
+    }
+  }
 }

@@ -4,12 +4,13 @@ class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final String name, errorName;
   final IconData prefixIcon;
-  bool obscureText, isValid;
+  final bool obscureText;
+  final bool isValid;
   final TextCapitalization textCapitalization;
   final TextInputType inputType;
-
-  CustomTextField({
-    Key? key,
+  final Widget? suffixIcon;
+  const CustomTextField({
+    super.key,
     required this.controller,
     required this.name,
     this.errorName = "",
@@ -17,59 +18,61 @@ class CustomTextField extends StatefulWidget {
     this.obscureText = false,
     this.isValid = false,
     this.textCapitalization = TextCapitalization.none,
+    this.suffixIcon,
     required this.inputType,
-  }) : super(key: key);
+  });
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
-  late FocusNode _focusNode;
-  bool _hasText = false;
+  bool isF = true;
 
   @override
   void initState() {
     super.initState();
+    widget.controller.addListener(_checkText);
+    _checkText(); // gọi ban đầu nếu có sẵn text
+  }
 
-    // Lắng nghe khi text thay đổi
-    widget.controller.addListener(() {
-      setState(() {
-        _hasText = widget.controller.text.isNotEmpty;
-        widget.isValid = false;
-      });
+  void _checkText() {
+    setState(() {
+      isF = widget.controller.text.isNotEmpty;
     });
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_checkText);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
-      child: TextField(
+      child: TextFormField(
+        
         controller: widget.controller,
-
         obscureText: widget.obscureText,
         keyboardType: widget.inputType,
         textCapitalization: widget.textCapitalization,
         maxLength: 32,
-        maxLines: 1,
-        textAlign: TextAlign.start,
-        style: const TextStyle(color: Colors.black, fontSize: 16),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return widget.errorName.isNotEmpty
+                ? widget.errorName
+                : "Vui lòng nhập $widget.name";
+          } else {
+            return null;
+          }
+        },
         decoration: InputDecoration(
-          prefixIcon: Icon(widget.prefixIcon),
-          suffixIcon:
-              (_hasText)
-                  ? IconButton(
-                    onPressed: () {
-                      widget.controller.clear();
-                      FocusScope.of(
-                        context,
-                      ).requestFocus(_focusNode); // giữ focus
-                    },
-                    icon: const Icon(Icons.close_outlined),
-                  )
-                  : null,
-          isDense: true,
+          contentPadding: EdgeInsets.symmetric(vertical:0, horizontal: 0),
+          prefixIcon: Icon(widget.prefixIcon,size: 18,),
+          suffixIcon: isF ? widget.suffixIcon : null,
+        
           labelText: widget.name,
           counterText: "",
           labelStyle: const TextStyle(color: Colors.grey),
@@ -84,7 +87,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
             borderSide: BorderSide(color: Colors.green),
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
-          errorText: widget.isValid ? widget.errorName : null,
         ),
       ),
     );

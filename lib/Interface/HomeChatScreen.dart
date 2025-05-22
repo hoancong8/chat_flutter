@@ -4,8 +4,10 @@ import 'package:demoappprovider/FirebaseService/AuthService.dart';
 import 'package:demoappprovider/FirebaseService/Cloud_Firestore.dart';
 import 'package:demoappprovider/Interface/InterfaceChat.dart';
 import 'package:demoappprovider/check/TimeChat.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:demoappprovider/model/person.dart';
+import 'package:go_router/go_router.dart';
 
 // void main() async {
 //   WidgetsFlutterBinding.ensureInitialized();
@@ -40,11 +42,13 @@ class _NaviagationDrawerState extends State<NaviagationDrawer> {
 
   @override
   Widget build(BuildContext context) => Drawer(
-    child: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [buildHealer(context), buildMenuItems(context)],
-      ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        buildHealer(context),
+        Expanded(child: buildMenuItems(context)),
+      ],
     ),
   );
 
@@ -56,15 +60,14 @@ class _NaviagationDrawerState extends State<NaviagationDrawer> {
         else ...[
           Padding(
             padding: const EdgeInsets.only(top: 16, bottom: 16),
-            child: 
-            ClipOval(
+            child: ClipOval(
               child: Image.network(
                 user!.urlImage,
                 fit: BoxFit.cover,
                 width: 100,
                 height: 100,
                 errorBuilder: (context, error, stackTrace) {
-                  return Icon(  
+                  return Icon(
                     Icons.person_outlined,
                     size: 100,
                     color: Colors.grey,
@@ -86,7 +89,28 @@ class _NaviagationDrawerState extends State<NaviagationDrawer> {
         title: Text("trang chủ"),
         onTap: () {},
       ),
+      ListTile(
+        leading: const Icon(Icons.person_2_outlined),
+        title: Text("Trang cá nhân"),
+        onTap: () {},
+      ),
+
+      Spacer(), // giờ mới hợp lệ
       const Divider(color: Colors.black54),
+      ListTile(
+        leading: const Icon(Icons.settings_outlined),
+        title: Text("Cài đặt"),
+        onTap: () {},
+      ),
+      ListTile(
+        leading: const Icon(Icons.logout_outlined),
+        title: Text("Dăng xuất"),
+        onTap: () async {
+          // GoRouter.of(context).go('/login');
+          // await AuthService().signOut();
+          GoRouter.of(context).go('/login');
+        },
+      ),
     ],
   );
 }
@@ -233,6 +257,7 @@ class _HomechatscreenState extends State<Homechatscreen> {
                                       child: Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
+
                                         children: [
                                           ClipOval(
                                             child: Image.network(
@@ -254,96 +279,119 @@ class _HomechatscreenState extends State<Homechatscreen> {
                                             ),
                                           ),
                                           SizedBox(width: 12),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 8,
-                                                ),
-                                                child: Text(
-                                                  item.name, // Bạn có thể thay bằng tên từ list hoặc chỉ số
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                  ),
-                                                  textAlign: TextAlign.start,
-                                                ),
-                                              ),
-                                              FutureBuilder<Object?>(
-                                                future: MessagerFirestore()
-                                                    .getLastMessage(
-                                                      widget.uid,
-                                                      item.uid,
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        top: 8,
+                                                      ),
+                                                  child: Text(
+                                                    item.name, // Bạn có thể thay bằng tên từ list hoặc chỉ số
+                                                    style: TextStyle(
+                                                      fontSize: 14,
                                                     ),
-                                                builder: (context, snapshot) {
-                                                  if (snapshot
-                                                          .connectionState ==
-                                                      ConnectionState.waiting) {
-                                                    return Text(
-                                                      "Đang tải...",
-                                                    ); // Hoặc SizedBox.shrink() nếu không muốn gì cả
-                                                  } else if (snapshot
-                                                      .hasError) {
-                                                    return Text("Lỗi");
-                                                  } else if (snapshot.hasData &&
-                                                      snapshot.data != null) {
-                                                    final lastMsg =
-                                                        snapshot.data
-                                                            as QueryDocumentSnapshot;
-                                                    final data =
-                                                        lastMsg.data()
-                                                            as Map<
-                                                              String,
-                                                              dynamic
-                                                            >;
-                                                    final text =
-                                                        data['text'] ??
-                                                        "Chưa có tin nhắn";
-                                                        
-                                                    final timestamp = data['timestamp'] as Timestamp;
-                                                    if(data['senderId']==widget.uid)
-                                                    {
-                                                      return Row(
-                                                      children: [
-                                                        Text(
-                                                          "Bạn: $text",
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
-                                                                  
-                                                          maxLines: 1,
-                                                          style: TextStyle(
-                                                            fontSize: 13
-                                                          ),
-                                                        ),
-                                                        Text(Timechat().formatFriendlyTime(timestamp.toDate())),
-                                                      ],
-                                                    );
+                                                    textAlign: TextAlign.start,
+                                                  ),
+                                                ),
+                                                FutureBuilder<Object?>(
+                                                  future: MessagerFirestore()
+                                                      .getLastMessage(
+                                                        widget.uid,
+                                                        item.uid,
+                                                      ),
+                                                  builder: (context, snapshot) {
+                                                    if (snapshot
+                                                            .connectionState ==
+                                                        ConnectionState
+                                                            .waiting) {
+                                                      return Text(
+                                                        "Đang tải...",
+                                                      ); // Hoặc SizedBox.shrink() nếu không muốn gì cả
+                                                    } else if (snapshot
+                                                        .hasError) {
+                                                      return Text("Lỗi");
+                                                    } else if (snapshot
+                                                            .hasData &&
+                                                        snapshot.data != null) {
+                                                      final lastMsg =
+                                                          snapshot.data
+                                                              as QueryDocumentSnapshot;
+                                                      final data =
+                                                          lastMsg.data()
+                                                              as Map<
+                                                                String,
+                                                                dynamic
+                                                              >;
+                                                      final text =
+                                                          data['text'] ??
+                                                          "Chưa có tin nhắn";
+
+                                                      final timestamp =
+                                                          data['timestamp']
+                                                              as Timestamp;
+                                                      if (data['senderId'] ==
+                                                          widget.uid) {
+                                                        return Row(
+                                                          children: [
+                                                            Flexible(
+                                                              child: Text(
+                                                                "Bạn: $text",
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+
+                                                                maxLines: 1,
+                                                              ),
+                                                            ),
+                                                            Text(
+                                                              Timechat()
+                                                                  .formatFriendlyTime(
+                                                                    timestamp
+                                                                        .toDate(),
+                                                                  ),
+                                                              style: TextStyle(
+                                                                fontSize: 13,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      } else {
+                                                        return Row(
+                                                          children: [
+                                                            Text(
+                                                              "$text",
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+
+                                                              maxLines: 1,
+                                                            ),
+                                                            Text(
+                                                              Timechat()
+                                                                  .formatFriendlyTime(
+                                                                    timestamp
+                                                                        .toDate(),
+                                                                  ),
+                                                              style: TextStyle(
+                                                                fontSize: 13,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      }
+                                                    } else {
+                                                      return Text(
+                                                        "Chưa có tin nhắn",
+                                                      );
                                                     }
-                                                    else{
-                                                      return Row(
-                                                      children: [
-                                                        Text(
-                                                          "$text",
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
-                                                          maxLines: 1,
-                                                        ),
-                                                        Text(Timechat().formatFriendlyTime(timestamp.toDate()),style: TextStyle(fontSize: 13),),
-                                                      ],
-                                                    );
-                                                    }
-                                                    
-                                                  } else {
-                                                    return Text(
-                                                      "Chưa có tin nhắn",
-                                                    );
-                                                  }
-                                                },
-                                              ),
-                                            ],
+                                                  },
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),

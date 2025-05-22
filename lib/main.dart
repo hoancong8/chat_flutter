@@ -36,6 +36,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   ); // hoặc DefaultFirebaseOptions.currentPlatform
+  // shared_preferences 
   runApp(
     MyApp(isLoggedIn: true)
   );

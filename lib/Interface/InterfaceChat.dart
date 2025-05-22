@@ -158,7 +158,7 @@ class _InterfaceChatState extends State<InterfaceChat> {
                 Expanded(
                   child: CustomTextField(
                     controller: controller,
-                    name: "mess",
+                    name: "nhập tin nhắn ...",
                     prefixIcon: Icons.abc,
                     inputType: TextInputType.text,
                   ),
